@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # Serviço do Banco de Dados com PostGIS
+  db:
+    image: postgis/postgis:15-3.4 # Imagem oficial com PostgreSQL e PostGIS
+    container_name: postgis_db
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=bus_predictions
+    ports:
+      - "5432:5432" # Expõe a porta do banco para o seu computador local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,13 @@
+# Ignorar arquivos e pastas do git
+.git
+.gitignore
+
+# Ignorar arquivos do python
+__pycache__/
+*.pyc
+
+# Ignorar arquivos do VSCode
+.vscode/
+
+# A LINHA MAIS IMPORTANTE: Ignorar a pasta de dados
+data/
