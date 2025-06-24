@@ -360,11 +360,41 @@ def prever_com_modelo_salvo(caminho_arquivo_teste, pasta_modelos='modelos_salvos
                     print(f"Erro ao prever para a linha {linha}: {e}")
         
         if previsoes_por_linha:
-            now = datetime.datetime.now()
+            # Formata as previsões com base no modo de predição
+            formatted_previsoes = []
+            
+            if modo_necessario == 'POSICAO':
+                # Cria um dicionário mapeando id para datahora para cada entrada
+                id_to_datahora = dict(zip(teste_df['id'], teste_df['datahora']))
+                
+                # Obtém a primeira datahora para o timestamp do payload da API
+                timestamp_ms = teste_df['datahora'].iloc[0]
+                datahora = datetime.datetime.fromtimestamp(timestamp_ms / 1000.0)
+                
+                # Para cada previsão, formata com os parâmetros corretos
+                for id_val, resultado in previsoes_por_linha:
+                    formatted_previsoes.append([id_val, resultado["latitude"], resultado["longitude"]])
+            else:  # ETA 
+                # Extrai o datetime do nome do arquivo para previsões ETA
+                filename = os.path.basename(caminho_arquivo_teste)
+                if filename.startswith('teste-') and '_' in filename:
+                    # Extrai data e hora do nome do arquivo
+                    date_part = filename.replace('teste-', '').replace('.json', '')
+                    date_str, hour_str = date_part.split('_')
+                    datahora = datetime.datetime.strptime(f"{date_str} {hour_str}:00:00", '%Y-%m-%d %H:%M:%S')
+                else:
+                    datahora = datetime.datetime.now()
+                
+                # Formata previsões ETA
+                for id_val, resultado in previsoes_por_linha:
+                    formatted_previsoes.append([id_val, resultado])
+                
+            # Cria o payload da API com o formato correto
             payload_api = {
-                "aluno": NOME_ALUNO, "senha": SENHA_SECRETA,
-                "datahora": now.strftime('%Y-%m-%d %H:%M:%S'),
-                "previsoes": sorted(previsoes_por_linha, key=lambda x: x[0])
+            "aluno": NOME_ALUNO,
+            "senha": SENHA_SECRETA,
+            "datahora": datahora.strftime('%Y-%m-%d %H:%M:%S'),
+            "previsoes": sorted(formatted_previsoes, key=lambda x: x[0])
             }
             print("\n--- Payload Final ---")
             print(json.dumps(payload_api, indent=2))
